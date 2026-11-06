@@ -266,6 +266,10 @@ main{min-width:0;padding:6px 12px 24px}
 .opts .opt input{accent-color:var(--primary)}
 .otp{margin-bottom:14px}
 .otp-msg{text-align:center}
+.resend{margin:0 0 14px;text-align:center;font-size:13px;color:var(--muted)}
+.link-btn{display:inline-flex;align-items:center;gap:6px;padding:0;border:0;background:none;font-size:13px;font-weight:600;color:var(--primary);cursor:pointer}
+.link-btn:hover:not(:disabled){text-decoration:underline}
+.link-btn:disabled{color:var(--muted);cursor:not-allowed}
 .hint.ok{border-left-color:var(--ok);color:var(--ok);background:var(--ok-bg)}
 @media (max-width:640px){.card-foot .btn,.proc-foot .btn{flex:1 1 100%}.proc .body{grid-template-columns:1fr}.modal-b,.modal-h,.modal-f{padding-left:16px;padding-right:16px}}
 
@@ -424,6 +428,7 @@ main{min-width:0;padding:6px 12px 24px}
         <div class="hint"><i class="fa fa-info-circle" aria-hidden="true"></i><span id="otpSentTo">Enter the 6-digit code we just sent.</span></div>
         <div class="otp otp-gap"><input maxlength="1" inputmode="numeric" aria-label="Digit 1"><input maxlength="1" inputmode="numeric" aria-label="Digit 2"><input maxlength="1" inputmode="numeric" aria-label="Digit 3"><input maxlength="1" inputmode="numeric" aria-label="Digit 4"><input maxlength="1" inputmode="numeric" aria-label="Digit 5"><input maxlength="1" inputmode="numeric" aria-label="Digit 6"></div>
         <div class="field" id="otpField"><div class="err-msg otp-msg">Invalid verification code. Please try again.</div></div>
+        <p class="resend">Didn't get the code? <button type="button" class="link-btn" id="resendCode"><i class="fa fa-refresh" aria-hidden="true"></i> <span id="resendTxt">Resend code</span></button></p>
       </div>
     </div>
     <div class="modal-f">
@@ -653,12 +658,23 @@ main{min-width:0;padding:6px 12px 24px}
   function otpDest(){ var ph=$('input[name=om]:checked').value==='phone'; return {label:ph?'Phone Number':'Email Address', val:ph?'(555) 555-5555':'info@webcodegenie.net'}; }
   function syncOtpDest(){ var d=otpDest(); $('#otpToLbl').textContent=d.label; $('#otpTo').value=d.val; }
   $$('input[name=om]').forEach(function(r){ r.addEventListener('change',syncOtpDest); });
-  function openOtp(after){ syncOtpDest(); $$('.otp input').forEach(function(i){ i.value=''; }); $('#otpField').classList.remove('bad'); otp.hidden=false; $('#otpStep1').hidden=false; $('#otpStep2').hidden=true; otp._after=after; $('#otpNext').innerHTML='<i class="fa fa-paper-plane-o" aria-hidden="true"></i> Send 6-digit Code'; }
-  $$('[data-close]').forEach(function(b){ b.addEventListener('click',function(){ otp.hidden=true; }); });
+  var resendT, resendLeft=0;
+  function tickResend(){
+    var b=$('#resendCode'), t=$('#resendTxt');
+    if(resendLeft>0){ b.disabled=true; t.textContent='Resend code in '+resendLeft+'s'; resendLeft--; resendT=setTimeout(tickResend,1000); }
+    else { b.disabled=false; t.textContent='Resend code'; }
+  }
+  function startResend(){ clearTimeout(resendT); resendLeft=30; tickResend(); }
+  $('#resendCode').addEventListener('click',function(){
+    $$('.otp input').forEach(function(i){ i.value=''; }); $('#otpField').classList.remove('bad'); $('.otp input').focus();
+    startResend(); toast('A new 6-digit code was sent to '+otpDest().val+'.');
+  });
+  function openOtp(after){ clearTimeout(resendT); syncOtpDest(); $$('.otp input').forEach(function(i){ i.value=''; }); $('#otpField').classList.remove('bad'); otp.hidden=false; $('#otpStep1').hidden=false; $('#otpStep2').hidden=true; otp._after=after; $('#otpNext').innerHTML='<i class="fa fa-paper-plane-o" aria-hidden="true"></i> Send 6-digit Code'; }
+  $$('[data-close]').forEach(function(b){ b.addEventListener('click',function(){ otp.hidden=true; clearTimeout(resendT); }); });
   otp.addEventListener('mousedown',function(e){ if(e.target===otp) otp.hidden=true; });
   document.addEventListener('keydown',function(e){ if(e.key==='Escape') otp.hidden=true; });
   $('#otpNext').addEventListener('click',function(){
-    if(!$('#otpStep1').hidden){ $('#otpSentTo').textContent='Enter the 6-digit code we just sent to '+otpDest().val+'.'; $('#otpStep1').hidden=true; $('#otpStep2').hidden=false; this.innerHTML='<i class="fa fa-check" aria-hidden="true"></i> Verify Admin'; $('.otp input').focus(); return; }
+    if(!$('#otpStep1').hidden){ $('#otpSentTo').textContent='Enter the 6-digit code we just sent to '+otpDest().val+'.'; startResend(); $('#otpStep1').hidden=true; $('#otpStep2').hidden=false; this.innerHTML='<i class="fa fa-check" aria-hidden="true"></i> Verify Admin'; $('.otp input').focus(); return; }
     var code=$$('.otp input').map(function(i){ return i.value; }).join('');
     if(code!=='111111' && code!=='123456'){ $('#otpField').classList.add('bad'); return; }
     otp.hidden=true; if(otp._after) otp._after();
