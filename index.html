@@ -275,6 +275,10 @@ main{min-width:0;padding:6px 12px 24px}
 @media (max-width:860px){.topbar{gap:8px;padding-right:10px}.topbar .logoblock{width:120px}}
 @media (max-width:640px){.topbar .bdg{display:none}.topbar .logoblock{margin-right:auto}.topbar .un{display:none}.menu-btn{order:-1}}
 @media (max-width:480px){.topbar .logoblock{width:90px;padding:0 6px}.helpbtn{padding:7px 10px}.helpbtn .hl{display:none}}
+.drop[contenteditable]{caret-color:transparent;outline:none}
+.drop[contenteditable]:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.drop input[type=file]{pointer-events:none}
+.drop.filled .dz-file{cursor:default}
 .otp-msg{text-align:center}
 .resend{margin:0 0 14px;text-align:center;font-size:13px;color:var(--muted)}
 .link-btn{display:inline-flex;align-items:center;gap:6px;padding:0;border:0;background:none;font-size:13px;font-weight:600;color:var(--primary);cursor:pointer}
@@ -581,6 +585,31 @@ main{min-width:0;padding:6px 12px 24px}
     zone.addEventListener('drop',function(e){ var f=e.dataTransfer&&e.dataTransfer.files[0]; if(f) handle(d,f); });
     state[d.id] = d.initial ? JSON.parse(JSON.stringify(d.initial)) : null;
     render(d);
+  });
+  /* ---------- Paste into a box: Ctrl+V, or right-click > Paste (the box is a paste-only editable area, so the browser's own Paste item appears) ---------- */
+  var hoverDef=null;
+  defs.forEach(function(d){
+    var z=$('#dw-'+d.id+' .drop');
+    z.setAttribute('contenteditable','true'); z.setAttribute('spellcheck','false'); z.setAttribute('aria-label','Upload '+d.label+'. Drop, click, or paste a file.');
+    z.addEventListener('mouseenter',function(){ hoverDef=d; });
+    z.addEventListener('mouseleave',function(){ if(hoverDef===d) hoverDef=null; });
+    z.addEventListener('beforeinput',function(e){ if(e.inputType!=='insertFromPaste') e.preventDefault(); });
+    z.addEventListener('click',function(e){
+      if(z.classList.contains('filled') || e.target.closest('button')) return;
+      $('input[type=file]',z).click();
+    });
+  });
+  function pasteTarget(e){
+    var w=e.target&&e.target.closest&&e.target.closest('.drop-wrap');
+    if(w) return defs.filter(function(x){ return 'dw-'+x.id===w.id; })[0];
+    return hoverDef;
+  }
+  document.addEventListener('paste',function(e){
+    var t=e.target, typing=t&&t.matches&&t.matches('input[type=text],input[type=password],textarea');
+    var d=pasteTarget(e); if(!d || (typing && !hoverDef)) return;
+    e.preventDefault();
+    var f=e.clipboardData&&e.clipboardData.files&&e.clipboardData.files[0];
+    if(f) handle(d,f); else toast('No file on the clipboard. Copy a file first, then paste.',true);
   });
   // stop browser from opening a file dropped outside the zones
   ['dragover','drop'].forEach(function(ev){ window.addEventListener(ev,function(e){ e.preventDefault(); }); });
