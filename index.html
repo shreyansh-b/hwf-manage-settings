@@ -251,12 +251,9 @@ main{min-width:0;padding:6px 12px 24px}
 .drop:not(.wide) .thumb.docbox{background:#fff}
 .card .body .hint{grid-column:1/-1}
 .card .body.cols3{grid-template-columns:repeat(3,minmax(0,1fr));align-items:start}
-.sidebox{display:grid;gap:14px;min-width:0}
 .grp-t{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0;font-size:15px;font-weight:700;color:var(--primary)}
 .grp-t small{font-size:12px;font-weight:400;color:var(--muted)}
 .grp-t:not(:first-child){margin-top:6px;padding-top:16px;border-top:1px solid var(--border)}
-.cols3g{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 16px;align-items:start}
-@media (max-width:860px){.cols3g{grid-template-columns:1fr}}
 @media (max-width:860px){.card .body.cols3{grid-template-columns:1fr}}
 .proc .body{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 16px}
 .proc .body .full{grid-column:1/-1}
@@ -328,17 +325,10 @@ main{min-width:0;padding:6px 12px 24px}
 
       <!-- Homepage details -->
       <section class="card" id="sec-home">
-        <header><div class="ci"><i class="fa fa-home" aria-hidden="true"></i></div><div><h2>Homepage details</h2><p>Logos, sidebar blocks and legal documents shown on the customer homepage.</p></div></header>
+        <header><div class="ci"><i class="fa fa-home" aria-hidden="true"></i></div><div><h2>Homepage details</h2><p>Logo and legal documents shown on the customer homepage.</p></div></header>
         <div class="body">
           <h3 class="grp-t"><i class="fa fa-picture-o" aria-hidden="true"></i> Logos <small>Drop a file onto a box, or click it to browse.</small></h3>
-          <div id="slot-headerLogo"></div><div id="slot-footerLogo"></div>
-
-          <h3 class="grp-t"><i class="fa fa-columns" aria-hidden="true"></i> Sidebar sections <small>Heading and image shown in each homepage sidebar block.</small></h3>
-          <div class="cols3g">
-            <div class="sidebox"><div class="field" data-f="sh1"><label class="lbl" for="sh1">Sidebar Heading 1</label><input type="text" id="sh1" maxlength="60" placeholder="Why Flags?"><div class="err-msg"></div></div><div id="slot-sideImg1"></div></div>
-            <div class="sidebox"><div class="field" data-f="sh2"><label class="lbl" for="sh2">Sidebar Heading 2</label><input type="text" id="sh2" maxlength="60" placeholder="How It Works"><div class="err-msg"></div></div><div id="slot-sideImg2"></div></div>
-            <div class="sidebox"><div class="field" data-f="sh3"><label class="lbl" for="sh3">Sidebar Heading 3</label><input type="text" id="sh3" maxlength="60" placeholder="Our Impact"><div class="err-msg"></div></div><div id="slot-sideImg3"></div></div>
-          </div>
+          <div id="slot-headerLogo"></div>
 
           <h3 class="grp-t"><i class="fa fa-file-text-o" aria-hidden="true"></i> Legal documents <small>PDF or Word files only.</small></h3>
           <div id="slot-privacy"></div><div id="slot-terms"></div>
@@ -498,10 +488,6 @@ main{min-width:0;padding:6px 12px 24px}
   /* ---------- Upload definitions ---------- */
   var defs = [
     {id:'headerLogo', label:'Header logo', req:true, kind:'image', maxMB:3, dim:null, where:'Homepage · top header', initial:{name:'logo-white.png', size:36330, url:SAMPLE_LOGO, w:578, h:134}},
-    {id:'footerLogo', label:'Footer logo', req:true, kind:'image', maxMB:3, dim:null, where:'Homepage · footer'},
-    {id:'sideImg1', label:'Sidebar image 1', req:false, kind:'image', maxMB:3, dim:null, where:'Homepage · sidebar block 1'},
-    {id:'sideImg2', label:'Sidebar image 2', req:false, kind:'image', maxMB:3, dim:null, where:'Homepage · sidebar block 2'},
-    {id:'sideImg3', label:'Sidebar image 3', req:false, kind:'image', maxMB:3, dim:null, where:'Homepage · sidebar block 3'},
     {id:'privacy', label:'Privacy Policy', req:true, kind:'doc', maxMB:3, dim:null, where:'Linked in the website footer'},
     {id:'terms', label:'Terms of Services', req:true, kind:'doc', maxMB:3, dim:null, where:'Linked in the website footer'}
   ];
@@ -644,17 +630,9 @@ main{min-width:0;padding:6px 12px 24px}
   $('#saveHome').addEventListener('click',function(){
     var first=null;
     defs.forEach(function(d){ if(d.req && !(state[d.id]&&state[d.id].url)){ var w=$('#dw-'+d.id); w.classList.add('bad'); $('.err-msg',w).textContent=d.label+' is required.'; first=first||w; } });
-    [1,2,3].forEach(function(n){
-      var h=$('#sh'+n), f=h.closest('.field'), v=h.value.trim(), img=state['sideImg'+n]&&state['sideImg'+n].url, w=$('#dw-sideImg'+n);
-      f.classList.remove('bad'); w.classList.remove('bad');
-      if(v.length>60){ f.classList.add('bad'); $('.err-msg',f).textContent='Heading must be 60 characters or fewer.'; first=first||f; }
-      else if(img && !v){ f.classList.add('bad'); $('.err-msg',f).textContent='Add a heading for sidebar block '+n+', since it has an image.'; first=first||f; }
-      else if(v && !img){ w.classList.add('bad'); $('.err-msg',w).textContent='Add an image for sidebar block '+n+', since it has a heading.'; first=first||w; }
-    });
     if(first){ first.scrollIntoView({behavior:'smooth',block:'center'}); toast('Fix the highlighted fields, then save again.',true); return; }
     toast('Homepage details saved.');
   });
-  [1,2,3].forEach(function(n){ $('#sh'+n).addEventListener('input',function(){ this.closest('.field').classList.remove('bad'); }); });
   function smtpOk(){ return validate($('#smtpBody')); }
   $('#saveSmtp').addEventListener('click',function(){ if(smtpOk()) toast('SMTP details saved.'); else toast('Fix the highlighted fields, then try again.',true); });
   $('#validateSmtp').addEventListener('click',function(){ if(smtpOk()) toast('SMTP credentials are valid.'); else toast('Fix the highlighted fields, then try again.',true); });
