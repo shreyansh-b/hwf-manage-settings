@@ -265,6 +265,16 @@ main{min-width:0;padding:6px 12px 24px}
 .card .body>.full>.proc:last-of-type{margin-bottom:0}
 .opts .opt input{accent-color:var(--primary)}
 .otp{margin-bottom:14px}
+/* responsive top bar: collapse the badge, centre text and labels step by step so nothing wraps or gets cut off */
+.topbar{min-width:0;overflow:hidden}
+.topbar .bdg{min-width:0}
+.topbar .bdg b,.topbar .bdg small{white-space:nowrap}
+.topbar .right{flex:none;margin-left:auto}
+.topbar .center{min-width:0;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:1100px){.topbar .center{display:none}.topbar .bdg{margin-right:auto}}
+@media (max-width:860px){.topbar{gap:8px;padding-right:10px}.topbar .logoblock{width:120px}}
+@media (max-width:640px){.topbar .bdg{display:none}.topbar .logoblock{margin-right:auto}.topbar .un{display:none}.menu-btn{order:-1}}
+@media (max-width:480px){.topbar .logoblock{width:90px;padding:0 6px}.helpbtn{padding:7px 10px}.helpbtn .hl{display:none}}
 .otp-msg{text-align:center}
 .resend{margin:0 0 14px;text-align:center;font-size:13px;color:var(--muted)}
 .link-btn{display:inline-flex;align-items:center;gap:6px;padding:0;border:0;background:none;font-size:13px;font-weight:600;color:var(--primary);cursor:pointer}
@@ -283,7 +293,7 @@ main{min-width:0;padding:6px 12px 24px}
   <button class="menu-btn" id="menuBtn" type="button" aria-label="Toggle menu"><i class="fa fa-bars" aria-hidden="true"></i></button>
   <div class="bdg"><span class="medal">1</span><div><b>#1 Flag program Management</b><small>Software in America</small></div></div>
   <div class="center">www.helpingwithflags.com | Version 3.5</div>
-  <div class="right"><span class="helpbtn"><i class="fa fa-headphones" aria-hidden="true"></i> Help</span><span class="usr"><span class="av"></span>SuperUser</span></div>
+  <div class="right"><span class="helpbtn"><i class="fa fa-headphones" aria-hidden="true"></i><span class="hl">Help</span></span><span class="usr"><span class="av"></span><span class="un">SuperUser</span></span></div>
 </div>
 
 <div class="shell">
